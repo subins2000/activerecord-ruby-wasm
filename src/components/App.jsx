@@ -11,7 +11,7 @@ const App = () => {
 
   const runCode = () => {
     setLogs([])
-    console.log(runRubyCode(window.monacoEditor.getValue()).toString())
+    runRubyCode(window.monacoEditor.getValue())
   }
 
   return (

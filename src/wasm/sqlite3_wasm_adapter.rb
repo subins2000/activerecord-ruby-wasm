@@ -41,7 +41,7 @@ module ActiveRecord
         end
 
         def exec(...)
-          JS.global[:window].sqliteExec(...)
+          JS.global[:console].sqliteExec(...)
         end
 
         def execute_batch2(...)
