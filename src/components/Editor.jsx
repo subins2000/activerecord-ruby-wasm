@@ -13,11 +13,20 @@ const Editor = () => {
 
         window.monacoEditor = monaco.editor.create(monacoEl.current, {
           value:
-`class Place < ActiveRecord::Base
+`ActiveRecord::Schema.define do
+  create_table :places do |t|
+    t.string :name
+    t.string :lat
+    t.string :lon
+    t.timestamps
+  end
+  add_index :places, :name, unique: true
 end
 
-puts Place.table_exists?
-puts "aaaa"
+class Place < ActiveRecord::Base
+end
+
+puts Place.count
 `,
           language: 'ruby'
         });

@@ -1,15 +1,16 @@
 import { DefaultRubyVM } from "@ruby/wasm-wasi/dist/browser";
 
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
-import dbFile from "../../kerala-places-db.sqlite3?url";
 
 import rubyWasmFileUrl from "./ruby.wasm?url"
 import rbCode from "./sqlite3_wasm_adapter.rb?raw"
 
+import dbFileUrl from "../../kerala-places-db.sqlite3?url";
+
 const response = await fetch(rubyWasmFileUrl)
 const module = await WebAssembly.compileStreaming(response)
 
-const { vm } = await DefaultRubyVM(module, {consolePrint: true});
+const { vm } = await DefaultRubyVM(module);
 
 let db, sqlite3;
 window.sqliteExec = function (sql) {
@@ -31,19 +32,23 @@ const initializeSQLite = async () => {
       print: log,
       printErr: log,
     });
-    log('Done initializing. Running demo...');
+    log('Done initializing');
   } catch (err) {
     log('Initialization error:', err.name, err.message);
   }
 };
 
 await initializeSQLite();
-db = new sqlite3.oo1.DB(dbFile, 'ct');
 
-export const runRubyCode = () => {
-  const inputCode = window.monacoEditor.getValue()
+export const runRawRubyCode = input => {
+  vm.eval(`
+    require "/bundle/setup"
+    require "js"
+    ${input}
+  `)
+}
 
-  return vm.eval(`
+vm.eval(`
     require "/bundle/setup"
     require "js"
     require "active_record"
@@ -75,7 +80,16 @@ export const runRubyCode = () => {
       database: 'db.sqlite3',
       reaping_frequency: 0
     )
-  
-    ${inputCode}
-  `);
+`)
+
+export const runRubyCode = () => {
+  const inputCode = window.monacoEditor.getValue()
+
+  return vm.eval(inputCode);
 }
+
+window.loadDb = async url => {
+  db = new sqlite3.oo1.DB(url, 'ct');
+}
+
+loadDb(dbFileUrl)
