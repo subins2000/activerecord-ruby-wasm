@@ -1,14 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Editor from './components/Editor';
-import Header from './components/Header';
+
+import App from './components/App';
+
 import './userWorker';
+import './wasm'
+
 import './index.css';
 
 ReactDOM.render(
   <React.StrictMode>
-    <Header />
-    <Editor />
+    <App />
   </React.StrictMode>,
   document.getElementById('root')
 );

@@ -1,4 +1,4 @@
-import { RubyVM, consolePrinter } from "@ruby/wasm-wasi"
+import { DefaultRubyVM } from "@ruby/wasm-wasi/dist/browser";
 
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
 import dbFile from "../../kerala-places-db.sqlite3?url";
@@ -9,17 +9,7 @@ import rbCode from "./sqlite3_wasm_adapter.rb?raw"
 const response = await fetch(rubyWasmFileUrl)
 const module = await WebAssembly.compileStreaming(response)
 
-const vm = new RubyVM();
-const printer = consolePrinter({
-    stdout: a => console.log(a),
-    stderr: a => console.log(a),
-});
-const imports = {wasi_snapshot_preview1: wasi.wasiImport}
-printer.addToImports(imports)
-vm.addToImports(imports)
-const { instance } = await WebAssembly.instantiate(buffer, imports);
-printer.setMemory(instance.exports.memory);
-await vm.setInstance(instance);
+const { vm } = await DefaultRubyVM(module, {consolePrint: true});
 
 let db, sqlite3;
 window.sqliteExec = function (sql) {
@@ -51,10 +41,9 @@ await initializeSQLite();
 db = new sqlite3.oo1.DB(dbFile, 'ct');
 
 export const runRubyCode = () => {
-  console.log("1234")
   const inputCode = window.monacoEditor.getValue()
 
-  console.log(vm.eval(`
+  return vm.eval(`
     require "/bundle/setup"
     require "js"
     require "active_record"
@@ -88,5 +77,5 @@ export const runRubyCode = () => {
     )
   
     ${inputCode}
-  `));
+  `);
 }

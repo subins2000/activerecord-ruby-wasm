@@ -1,8 +1,12 @@
 import React from 'react';
 
-const Header = () => {
+const Header = ({ runCode }) => {
   const onLoadDbClick = () => {
     
+  }
+
+  const onRunClick = () => {
+    runCode()
   }
   
   return (
@@ -11,7 +15,7 @@ const Header = () => {
         <a onClick={onLoadDbClick}>Load DB</a>
       </div>
       <div>
-        <button>Run</button>
+        <button onClick={onRunClick}>Run</button>
       </div>
       <div>
         <a href="https://github.com/subins2000/activerecord-ruby-wasm">GitHub</a>

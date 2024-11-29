@@ -41,7 +41,6 @@ module ActiveRecord
         end
 
         def exec(...)
-          JS.global[:document].write("cccc")
           JS.global[:window].sqliteExec(...)
         end
 
