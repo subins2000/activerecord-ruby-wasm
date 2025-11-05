@@ -10,19 +10,37 @@ const module = await WebAssembly.compileStreaming(response)
 
 const { vm } = await DefaultRubyVM(module);
 
-const window = {}
-
 const log = console.log;
 const error = console.error;
 
 let db, sqlite3;
 
-const start = () => {
-  log('Running SQLite3 version', sqlite3.version.libVersion);
+const initSqlite = async () => {
+  try {
+    log('Loading and initializing SQLite3 module...');
+    sqlite3 = await sqlite3InitModule({ print: log, printErr: error });
+    log('Running SQLite3 version', sqlite3.version.libVersion);
+    log('Done initializing.');
+  } catch (err) {
+    error('Initialization error:', err.name, err.message);
+  }
+};
 
+const initJsDb = () => {
   if (typeof db !== "undefined") {
     db.close()
   }
+
+  // Log the size of the OPFS /db.sqlite3 file if OPFS is available
+  navigator.storage.getDirectory().then(rootDir => {
+    rootDir.getFileHandle('db.sqlite3', { create: false }).then(fileHandle => {
+      return fileHandle.getFile();
+    }).then(file => {
+      log(`OPFS: /db.sqlite3 size: ${file.size} bytes`);
+    }).catch(err => {
+      log('Could not get /db.sqlite3 file size from OPFS:', err);
+    });
+  });
 
   db = new sqlite3.oo1.OpfsDb('/db.sqlite3');
   log(
@@ -32,19 +50,9 @@ const start = () => {
   );
 };
 
-const initializeSQLite = async () => {
-  try {
-    log('Loading and initializing SQLite3 module...');
-    sqlite3 = await sqlite3InitModule({ print: log, printErr: error });
-    log('Done initializing.');
-    initializeActiveRecord();
-  } catch (err) {
-    error('Initialization error:', err.name, err.message);
-  }
-};
-
+// Hack: binding to console to easily access from js context of ruby
 console.sqliteExec = function (sql) {
-  console.log("aaaaaaaaaaaa")
+  log("Executing query:", sql);
   try {
     let cols = [];
     let rows = db.exec(sql, { columnNames: cols, returnValue: "resultRows" });
@@ -62,7 +70,7 @@ console.sqliteChanges = function () {
   return db.changes();
 };
 
-const initializeActiveRecord = () => {
+const initActiveRecord = () => {
   vm.eval(`
     require "/bundle/setup"
     require "js"
@@ -95,20 +103,30 @@ const initializeActiveRecord = () => {
       database: 'db.sqlite3',
       reaping_frequency: 0
     )
-
-    ActiveRecord::Base.connection.execute("SELECT sqlite_version();")
   `)
 };
 
-export const runRubyCode = inputCode => {
-  return vm.eval(inputCode);
+const runRubyCode = inputCode => {
+  log(vm.eval(inputCode));
+}
+
+const initDbConnection = async () => {
+  initJsDb();
 }
 
 onmessage = e => {
-  if (e.data["type"] == "run") {
-    start()
+  if (e.data["type"] == "initDb") {
+    initDbConnection();
+  } else if (e.data["type"] == "runCode") {
     runRubyCode(e.data["code"])
   }
 }
 
-initializeSQLite();
+async function init() {
+  await initSqlite();
+  initActiveRecord();
+  await initDbConnection();
+  postMessage({ type: "initDone" });
+}
+
+init();
