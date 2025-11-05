@@ -37,7 +37,6 @@ module ActiveRecord
         private attr_reader :js_interface
 
         def initialize(config)
-          # @js_interface = config.fetch(:js_interface, "sqlite4rails").to_sym
         end
 
         def exec(...)
@@ -92,7 +91,7 @@ module ActiveRecord
         end
 
         def changes
-          JS.global[js_interface].changes.to_i
+          JS.global[:console].sqliteChanges.to_i
         end
       end
 
