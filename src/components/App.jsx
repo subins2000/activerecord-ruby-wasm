@@ -11,7 +11,7 @@ import {registerWorkerCallbacks, runRubyCode} from "../wasm/index"
 const App = () => {
   const [stdout, setStdout] = useState([])
   const [stderr, setStderr] = useState([])
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const runCode = () => {
     setStdout([])
