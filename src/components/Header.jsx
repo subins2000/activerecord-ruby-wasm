@@ -52,7 +52,7 @@ const Header = ({ runCode, onLoadSampleDbClick }) => {
       <div>
         <button className="green" onClick={onRunClick}>Run</button>
       </div>
-      <div>
+      <div className="flex items-center">
         <a href="https://github.com/subins2000/activerecord-ruby-wasm">GitHub @subins2000</a>
       </div>
     </div>
