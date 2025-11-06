@@ -130,13 +130,11 @@ const initActiveRecord = () => {
 };
 
 const runRubyCode = async inputCode => {
-  const jsResult = await vm.evalAsync(inputCode)
-  
-  console.log(wasi.fds[1], wasi.fds[2], wasi.fds[0], wasi.fds[3])
-  const result = new TextDecoder().decode(wasi.fds[2].file.data)
-  
-  console.log("bbbb", result)
-  postMessage({ type: "runCodeResult", result });
+  try {
+    vm.eval(inputCode)
+  } catch (e) {
+    console.stderrWrite(e.message)
+  }
 }
 
 const initDbConnection = async () => {

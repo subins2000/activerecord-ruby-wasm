@@ -11,7 +11,7 @@ import {registerWorkerCallbacks, runRubyCode} from "../wasm/index"
 const App = () => {
   const [stdout, setStdout] = useState([])
   const [stderr, setStderr] = useState([])
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const runCode = () => {
     setStdout([])
@@ -46,7 +46,7 @@ const App = () => {
   return (
     <>
       <Header runCode={runCode} />
-      <div className="flex space-x-4 h-full w-full">
+      <div className="flex space-x-4 h-full w-full pr-2">
         {isLoading ? <center className="text-center pl-4 pt-4">Loading...</center> : (
           <>
             <Editor />

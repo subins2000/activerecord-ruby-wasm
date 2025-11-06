@@ -2,20 +2,22 @@ import React from 'react';
 
 const Output = ({ stdout, stderr }) => {
   return (
-    <div className="flex-grow mt-2">
-      <div className="flex flex-col space-y-4 border-1 border-gray-300">
-        <div className="border-b-1 border-gray-300">stdout</div>
+    <div className="flex-grow mt-2 space-y-4">
+      <div className="flex flex-col border-2 border-gray-300">
+        <div className="border-b-2 border-gray-300 pl-2">stdout</div>
         <div className="px-2">
           {stdout.map((log, index) => (
             <div key={index}>{log}</div>
           ))}
         </div>
       </div>
-      <div>stderr</div>
-      <div className="px-2">
-        {stderr.map((log, index) => (
-          <div key={index}>{log}</div>
-        ))}
+      <div className="flex flex-col border-2 border-gray-300">
+        <div className="border-b-2 border-gray-300 pl-2">stderr</div>
+        <div className="px-2">
+          {stderr.map((log, index) => (
+            <div key={index}>{log}</div>
+          ))}
+        </div>
       </div>
     </div>
   );
