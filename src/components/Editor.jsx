@@ -33,7 +33,7 @@ puts Place.columns.map(&:name).join(",")
     return () => editor?.dispose();
   }, [monacoEl.current]);
 
-  return <div ref={monacoEl} id="editor" className="py-4 flex-grow basis-0"></div>;
+  return <div className="py-4 flex-grow basis-0 h-full w-full"><div ref={monacoEl} id="editor" className="h-full w-full"></div></div>;
 };
 
 export default Editor;

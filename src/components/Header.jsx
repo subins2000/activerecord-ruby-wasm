@@ -44,16 +44,16 @@ const Header = ({ runCode, onLoadSampleDbClick }) => {
   }
   
   return (
-    <div id="header" className="flex justify-between px-8 py-4 border-b-2 border-black">
-      <div className="flex space-x-4">
+    <div id="header" className="flex justify-between px-1 md:px-8 py-2 md:py-4 border-b-2 border-black">
+      <div className="flex space-x-2 md:space-x-4">
         <button onClick={onLoadDbClick}>Open DB</button>
         <button onClick={onLoadSampleDbClick}>Load sample DB</button>
       </div>
       <div>
         <button className="green" onClick={onRunClick}>Run</button>
       </div>
-      <div className="flex items-center">
-        <a href="https://github.com/subins2000/activerecord-ruby-wasm">GitHub @subins2000</a>
+      <div className=" flex items-center">
+        <a href="https://github.com/subins2000/activerecord-ruby-wasm">GitHub</a>
       </div>
     </div>
   );

@@ -58,7 +58,7 @@ const App = () => {
   return (
     <>
       <Header {...{ onLoadSampleDbClick, runCode }} />
-      <div className="flex space-x-4 h-full w-full pr-2">
+      <div className="flex flex-col space-y-2 md:flex-row md:space-x-4 h-full w-full pr-2">
         {isLoading ? <center className="text-center pl-4 pt-4">Loading...</center> : (
           <>
             <Editor runCode={runCode} />
