@@ -5,15 +5,18 @@ import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
 import rubyWasmFileUrl from "./ruby.wasm?url"
 import rbCode from "./sqlite3_wasm_adapter.rb?raw"
 
-const response = await fetch(rubyWasmFileUrl)
-const module = await WebAssembly.compileStreaming(response)
-
-const { vm } = await DefaultRubyVM(module);
-
 const log = console.log;
 const error = console.error;
 
-let db, sqlite3;
+let vm, wasi, db, sqlite3;
+
+const initVm = async () => {
+  const response = await fetch(rubyWasmFileUrl)
+  const module = await WebAssembly.compileStreaming(response)
+  const rubyVm = await DefaultRubyVM(module, {consolePrint: false});
+  vm = rubyVm.vm
+  wasi = rubyVm.wasi
+}
 
 const initSqlite = async () => {
   try {
@@ -70,11 +73,31 @@ console.sqliteChanges = function () {
   return db.changes();
 };
 
+console.stdoutWrite = function (str) {
+  postMessage({ type: "stdoutWrite", str })
+}
+
+console.stderrWrite = function (str) {
+  postMessage({ type: "stderrWrite", str })
+}
+
 const initActiveRecord = () => {
   vm.eval(`
     require "/bundle/setup"
     require "js"
     require "active_record"
+
+    $stdout = Object.new.tap do |obj|
+      def obj.write(str)
+        JS.global[:console].stdoutWrite(str)
+      end
+    end
+
+    $stderr = Object.new.tap do |obj|
+      def obj.write(str)
+        JS.global[:console].stderrWrite(str)
+      end
+    end
 
     def require(f)
       Kernel::require(f) unless f == "socket" || f == "sqlite3"
@@ -106,8 +129,14 @@ const initActiveRecord = () => {
   `)
 };
 
-const runRubyCode = inputCode => {
-  log(vm.eval(inputCode));
+const runRubyCode = async inputCode => {
+  const jsResult = await vm.evalAsync(inputCode)
+  
+  console.log(wasi.fds[1], wasi.fds[2], wasi.fds[0], wasi.fds[3])
+  const result = new TextDecoder().decode(wasi.fds[2].file.data)
+  
+  console.log("bbbb", result)
+  postMessage({ type: "runCodeResult", result });
 }
 
 const initDbConnection = async () => {
@@ -115,7 +144,7 @@ const initDbConnection = async () => {
 }
 
 onmessage = e => {
-  if (e.data["type"] == "initDb") {
+  if (e.data["type"] == "reloadDb") {
     initDbConnection();
   } else if (e.data["type"] == "runCode") {
     runRubyCode(e.data["code"])
@@ -123,6 +152,7 @@ onmessage = e => {
 }
 
 async function init() {
+  await initVm();
   await initSqlite();
   initActiveRecord();
   await initDbConnection();

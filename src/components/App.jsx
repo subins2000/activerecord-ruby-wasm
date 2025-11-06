@@ -6,14 +6,16 @@ import Output from './Output';
 
 import exampleDbUrl from "../example-db.sqlite3?url"
 
-import {runRubyCode, initDb} from "../wasm/index"
+import {registerWorkerCallbacks, runRubyCode} from "../wasm/index"
 
 const App = () => {
-  const [logs, setLogs] = useState([])
+  const [stdout, setStdout] = useState([])
+  const [stderr, setStderr] = useState([])
   const [isLoading, setIsLoading] = useState(true);
 
   const runCode = () => {
-    setLogs([])
+    setStdout([])
+    setStderr([])
     runRubyCode(window.monacoEditor.getValue())
   }
 
@@ -34,7 +36,11 @@ const App = () => {
         console.warn("OPFS: error checking db.sqlite3", err);
       }
     }
-    initDb({onInitDone: () => setIsLoading(false)});
+    registerWorkerCallbacks({
+      onInitDone: () => setIsLoading(false),
+      onStdoutWrite: (str) => setStdout((currStdout) => [...currStdout, str]),
+      onStderrWrite: (str) => setStderr((currStderr) => [...currStderr, str])
+    });
   }, []);
 
   return (
@@ -44,7 +50,7 @@ const App = () => {
         {isLoading ? <center className="text-center pl-4 pt-4">Loading...</center> : (
           <>
             <Editor />
-            <Output logs={logs} setLogs={setLogs} />
+            <Output stdout={stdout} stderr={stderr} />
           </>
         )}
       </div>
