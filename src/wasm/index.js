@@ -1,6 +1,6 @@
-import workerFileUrl from "./worker.js?url"
+import WasmWorker from "./worker.js?worker"
 
-const worker = new Worker(workerFileUrl, { type: 'module' });
+const worker = new WasmWorker();
 
 export const runRubyCode = code => {
   worker.postMessage({type: "runCode", code})
