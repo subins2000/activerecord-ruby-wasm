@@ -9,3 +9,7 @@ button {
 button.green {
   @apply bg-green-600
 }
+
+button:disabled {
+  @apply bg-gray-400 cursor-not-allowed
+}

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Header = ({ runCode, onLoadSampleDbClick }) => {
+const Header = ({ isLoading, runCode, onLoadSampleDbClick }) => {
   async function uploadToOpfs(fileInput) {
     try {
       // Access the root directory of OPFS
@@ -50,7 +50,7 @@ const Header = ({ runCode, onLoadSampleDbClick }) => {
         <button onClick={onLoadSampleDbClick}>Load sample DB</button>
       </div>
       <div>
-        <button className="green" onClick={onRunClick}>Run</button>
+        <button className="green" disabled={isLoading} onClick={onRunClick}>Run</button>
       </div>
       <div className=" flex items-center">
         <a href="https://github.com/subins2000/activerecord-ruby-wasm">GitHub</a>
