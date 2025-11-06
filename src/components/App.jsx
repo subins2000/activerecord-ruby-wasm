@@ -19,6 +19,16 @@ const App = () => {
     runRubyCode(window.monacoEditor.getValue())
   }
 
+  const loadSampleDb = async () => {
+    const rootDir = await navigator?.storage?.getDirectory();
+    const blob = await fetch(exampleDbUrl).then(response => response.blob());
+    const fileHandle = await rootDir.getFileHandle('db.sqlite3', { create: true });
+    const writable = await fileHandle.createWritable();
+    await writable.write(blob); 
+    await writable.close();
+    console.log("Sample DB loaded");
+  }
+
   useEffect(async () => {
     const rootDir = await navigator?.storage?.getDirectory();
     try {
@@ -27,11 +37,7 @@ const App = () => {
     } catch (err) {
       if (err && err.name === "NotFoundError") {
         console.log("OPFS: /db.sqlite3 does not exist. Fetching and saving sample places db...");
-        const blob = await fetch(exampleDbUrl).then(response => response.blob());
-        const fileHandle = await rootDir.getFileHandle('db.sqlite3', { create: true });
-        const writable = await fileHandle.createWritable();
-        await writable.write(blob);
-        await writable.close();
+        await loadSampleDb();
       } else {
         console.warn("OPFS: error checking db.sqlite3", err);
       }
@@ -43,13 +49,19 @@ const App = () => {
     });
   }, []);
 
+  const onLoadSampleDbClick = async () => {
+    setIsLoading(true);
+    await loadSampleDb();
+    setIsLoading(false);
+  }
+
   return (
     <>
-      <Header runCode={runCode} />
+      <Header {...{ onLoadSampleDbClick, runCode }} />
       <div className="flex space-x-4 h-full w-full pr-2">
         {isLoading ? <center className="text-center pl-4 pt-4">Loading...</center> : (
           <>
-            <Editor />
+            <Editor runCode={runCode} />
             <Output stdout={stdout} stderr={stderr} />
           </>
         )}

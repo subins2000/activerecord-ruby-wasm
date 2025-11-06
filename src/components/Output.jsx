@@ -2,7 +2,7 @@ import React from 'react';
 
 const Output = ({ stdout, stderr }) => {
   return (
-    <div className="flex-grow mt-2 space-y-4">
+    <div className="flex-grow basis-0 mt-2 space-y-4">
       <div className="flex flex-col border-2 border-gray-300">
         <div className="border-b-2 border-gray-300 pl-2">stdout</div>
         <div className="px-2">
